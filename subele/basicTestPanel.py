@@ -53,12 +53,17 @@ class BasicTestPanel(ttk.Frame) :
         ttk.Label(self , text="测试结果保存路径" , font=NormalConfig.cnFont).grid(row=2,column=0 , columnspan=6 , padx=10 , sticky=tk.W + tk.E)
         self.saveDataEntry = ttk.Entry(self)
         self.saveDataEntry.grid(row=2 , column=6 , columnspan=10 , sticky=tk.W+tk.E)
-        self.saveDataBtn = ttk.Button(self , text="浏览" , command=lambda : NormalEventHandler.saveasFileDialogAndSetEntryValue(self.saveDataEntry , ".txt"))
+        self.saveDataBtn = ttk.Button(self , text="浏览" , command=lambda : NormalEventHandler.saveasFileDialogAndSetEntryValue(self.saveDataEntry , True ,".txt"))
         self.saveDataBtn.grid(row=2 , column=17 , columnspan=2)
 
-        self.testBtn = ttk.Button(self , text="基础模型训练" , command=lambda : NormalEventHandler.workAction(self) )
+        self.testBtn = ttk.Button(self , text="基础模型测试" , command=lambda : NormalEventHandler.workAction(self) )
         self.testBtn.grid(row=3 , column=0 , columnspan=6 , padx=10 , sticky=tk.W)
-
+        
+        self.testTipsVar = tk.StringVar()
+        self.testTips= ttk.Label(self , textvariable=self.testTipsVar , font=("Microsoft YaHei" , 8) , foreground="red")
+        self.testTipsVar.set("点击按钮开始测试")
+        self.testTips.grid(row=3 , column=5 , columnspan=13 , sticky=tk.W)
+        
         #ouput
         self.outFrame = ttk.LabelFrame(self , text="部分输出结果")
         self.outFrame.grid(row=5 , column=0 , rowspan=2 , columnspan=20 , sticky=tk.W+tk.E+tk.N + tk.S)
@@ -147,19 +152,24 @@ class BasicTestPanel(ttk.Frame) :
             self.logFile.close()
         except :
             pass
-        #self.logText.config(state=tk.NORMAL) 
-        self.logText.insert(tk.END , "模型测试完成.\n" , "head")
-        self.logText.insert(tk.END ,"日志文件地址:"+ self.logPath +"\n" , "text")
+        if os.path.exists(self.saveDataPath) :
+            self.logText.insert(tk.END , "模型测试完成.\n" , "head")
+            self.logText.insert(tk.END ,"日志文件地址:"+ self.logPath +"\n" , "text")
+            self.testTipsVar.set("已完成.文件地址："+self.saveDataPath)
+            try :
+                subprocess.Popen("explorer /select,"+self.saveDataPath)
+            except Exception , e :
+                print e
+        else :
+            self.logText.insert(tk.END , "模型测试失败.\n" , "head")
+            self.testTipsVar.set("失败")
         try :
             self.logText.yview(tk.MOVETO , 1)
             self.logText.config(state=tk.DISABLED)
             self.outText.config(state=tk.DISABLED)
+            self.testBtn.config(state=tk.NORMAL)
         except :
             pass
-        try :
-            subprocess.Popen("explorer /select,"+self.saveDataPath)
-        except Exception , e :
-            print e
         
     def work(self) :
         self.workThread = threading.Thread(target=self.cmdWork , args=(self.cmdstr ,))
@@ -168,6 +178,8 @@ class BasicTestPanel(ttk.Frame) :
         #ui init should at main thread
         self.logText.config(state=tk.NORMAL)
         self.outText.config(state=tk.NORMAL)
+        self.testBtn.config(state=tk.DISABLED)
+        self.testTipsVar.set("正在测试")
         #start threads
         self.workThread.start()
         threading.Thread(target=self.updateLog).start()

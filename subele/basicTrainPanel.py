@@ -3,6 +3,7 @@ import Tkinter as tk
 import ttk
 import tkFileDialog
 import tkFont
+import tkMessageBox
 
 import os
 import sys
@@ -52,7 +53,7 @@ class BasicTrainPanel(ttk.Frame) :
         self.saveDataLabel.grid(row=2 , column=0 , columnspan=6, padx=10 , sticky=tk.W+tk.E)
         self.saveDataEntry = ttk.Entry(self)
         self.saveDataEntry.grid(row=2 , column=6 , columnspan=10 , sticky=tk.E+tk.W)
-        self.saveDataBtn = ttk.Button(self , text="浏览" , command=lambda : NormalEventHandler.saveasFileDialogAndSetEntryValue(self.saveDataEntry , ".model"))
+        self.saveDataBtn = ttk.Button(self , text="浏览" , command=lambda : NormalEventHandler.saveasFileDialogAndSetEntryValue(self.saveDataEntry))
         self.saveDataBtn.grid(row=2 , column=17 , columnspan=2 )
         
         self.maxIteLabel = ttk.Label(self , text="训练最大迭代次数" , font=NormalConfig.cnFont).grid(row=3,column=0 , columnspan=6 , padx=10 , sticky=tk.W + tk.E )
@@ -61,7 +62,12 @@ class BasicTrainPanel(ttk.Frame) :
         self.maxIteEntry.insert(0,"5")
    
         self.trainBtn = ttk.Button(self , text="基础模型训练" , command=lambda : NormalEventHandler.workAction(self))
-        self.trainBtn.grid(row=4 , column=0 , columnspan=6 , padx=10 , sticky=tk.W)
+        self.trainBtn.grid(row=4 , column=0 , columnspan=5 , padx=10 , sticky=tk.W)
+        
+        self.trainTipsVar = tk.StringVar()
+        self.trainTips= ttk.Label(self , textvariable=self.trainTipsVar , font=("Microsoft YaHei" , 8) , foreground="red")
+        self.trainTipsVar.set("点击按钮开始训练")
+        self.trainTips.grid(row=4 , column=5 , columnspan=13 , sticky=tk.W)
         
         self.logFrame = ttk.Labelframe(self , text="训练日志输出")
         self.logFrame.grid(row=6 , column=0 , rowspan=3 , columnspan=20 , sticky=tk.W+tk.N+tk.S+tk.E)
@@ -140,35 +146,59 @@ class BasicTrainPanel(ttk.Frame) :
         
         self.logText.insert(tk.END , "开始训练\n" ,"head")
         self.logText.update()
-        while True :
+        #open log file
+        try_times = 3
+        while try_times > 0 :
             try :
                 self.logFile = open(self.logPath) # if this thread run before the workThread , it may cause error : the file has not been create
                 break
             except :
-                time.sleep(1)
-        while not self.isWorkThreadEnd :
+                time.sleep(4)
+                try_times -= 1
+        else :
+            self.logFile = None
+        while not self.isWorkThreadEnd and self.logFile != None :
             cont = self.logFile.read()
             if cont != '' :
-                self.logText.config(state=tk.NORMAL)
                 self.logText.insert(tk.END , cont , "text")
                 self.logText.yview(tk.MOVETO , 1)
-                self.logText.update()
-                self.logText.config(state=tk.DISABLED) 
-            time.sleep(0.5)
-        self.logFile.close()
+            time.sleep(1.5)
         try :
-            subprocess.Popen("explorer /select,"+self.saveDataPath + "." + str(self.maxIte - 1) + ".model")
+            self.logFile.close()
         except :
             pass
+        #test if the model has been generated 
+        generatedModelPath = self.saveDataPath + "." + str(self.maxIte - 1) + ".model"
+        if not os.path.exists(generatedModelPath) :
+            self.logText.insert(tk.END , "生成模型失败\n" , "head")
+            self.trainTipsVar.set("失败")
+        else :
+            try :
+                self.trainTipsVar.set("已完成")
+                subprocess.Popen("explorer /select,"+self.saveDataPath + "." + str(self.maxIte - 1) + ".model")
+            except :
+                pass
+        #disabled the text & enable the traint btn
+        try :
+            self.trainBtn.config(state=tk.NORMAL)
+            self.logText.config(state=tk.DISABLED) 
+        except :
+            pass
+        
     def work(self) :
         self.workThread = threading.Thread(target=self.cmdWork , args=(self.cmdstr , ))
         self.isWorkThreadEnd = False
+        
+        self.logText.config(state=tk.NORMAL)
+        self.trainBtn.config(state=tk.DISABLED)
+        self.trainTipsVar.set("训练时间较长,请耐心等待,不要关掉程序.")
+        
         self.workThread.start()
         threading.Thread(target=self.updateLog).start()
         
     
     def cmdWork(self , cmdstr) :
         self.isWorkThreadEnd = False
-        sp = subprocess.Popen(cmdstr , shell=True , stderr=subprocess.PIPE)
+        sp = subprocess.Popen(cmdstr , shell=True )
         sp.wait()
         self.isWorkThreadEnd = True 

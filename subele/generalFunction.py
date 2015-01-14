@@ -36,6 +36,7 @@ def createTextWithScroll(master , row=0 , col=0 , rowspan=1 , colspan=30) :
     scroll.config(command=logText.yview)
     logText.config(yscrollcommand=scroll.set)
     NormalConfig.setTextTag(logText)
+    logText.config(cursor="arrow")
     return logText 
     
 if __name__ == "__main__" :

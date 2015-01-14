@@ -25,7 +25,7 @@ class NormalConfig(ttk.Frame) :
         #make sure the exe path
         self.exePrePath = ''
         self.otExe = "/otcws"
-        self.cusOtExe = "/otcws_customized"
+        self.cusOtExe = "/otcws-customized"
         try :
             self.exedir = os.path.normpath(self.basedir + "/ltp-cws-exe")
         
@@ -35,6 +35,10 @@ class NormalConfig(ttk.Frame) :
                 self.exePrePath = os.path.normpath(self.exedir + "/linux_amd64/")
             elif self.system == "Windows" and self.bits == 64 :
                 self.exePrePath = os.path.normpath(self.exedir + '/win_x64/')
+                self.otExe += ".exe"
+                self.cusOtExe += ".exe"
+            elif self.system == "Windows" and self.bits == 32 :
+                self.exePrePath = os.path.normpath(self.exedir + '/win_x86/')
                 self.otExe += ".exe"
                 self.cusOtExe += ".exe"
             else :
@@ -66,5 +70,5 @@ class NormalConfig(ttk.Frame) :
         #text tag
         target.tag_config("head" , foreground="red" , spacing1=10,spacing3=10,justify=tk.CENTER,font=("Microsoft YaHei",14,"bold"),background="#f0f0f0" )
         target.tag_config("text" , foreground="black" ,font=("Courier" , 8))
-        target.tag_config("cnText" , foreground="black" ,font=("Microsoft YaHei,Courier" , 8))
+        target.tag_config("cnText" , foreground="black" ,font=("Microsoft YaHei" , 8))
     
