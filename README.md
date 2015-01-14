@@ -1,0 +1,6 @@
+The GUI for LTP-CWS
+
+using tkinter of pyhon 
+what a bad coding ...
+
+I should know python more ~ and i 'll be not chose tkinter any more ...
