@@ -153,7 +153,8 @@ class BasicTestPanel(ttk.Frame) :
             if logCont != "" :
                 self.logText.insert(tk.END , logCont , "text")
                 self.logText.see(tk.END)
-            time.sleep(1.5)
+            self.outText.update()
+            time.sleep(0.1)
         try :
             self.outFile.close()
             self.logFile.close()
@@ -189,8 +190,8 @@ class BasicTestPanel(ttk.Frame) :
         self.testTipsVar.set("正在测试")
         #start threads
         self.workThread.start()
-        threading.Thread(target=self.updateLog).start()
-        
+        #threading.Thread(target=self.updateLog).start()
+        self.updateLog()
         
         
     def cmdWork(self , cmdStr) :

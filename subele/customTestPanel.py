@@ -161,8 +161,9 @@ class CustomTestPanel(ttk.Frame) :
             logCont = self.logFile.read()
             if logCont != "" :
                 self.logText.insert(tk.END , logCont , "text")
-                self.logText.see(tk.END)
-            time.sleep(1.5)
+                self.logText.see(tk.END) 
+            self.update()
+            time.sleep(0.1)            
         try :
             self.outFile.close()
             self.logFile.close()
@@ -194,10 +195,12 @@ class CustomTestPanel(ttk.Frame) :
         #ui init should at main thread
         self.logText.config(state=tk.NORMAL)
         self.outText.config(state=tk.NORMAL)
+        self.testBtn.config(state=tk.DISABLED)
+        self.testTipsVar.set("正在测试")
         #start threads
         self.workThread.start()
-        threading.Thread(target=self.updateLog).start()
-        
+        #threading.Thread(target=self.updateLog).start()
+        self.updateLog()
         
         
     def cmdWork(self , cmdStr) :

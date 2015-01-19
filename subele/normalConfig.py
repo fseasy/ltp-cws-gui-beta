@@ -30,9 +30,22 @@ class NormalConfig(ttk.Frame) :
             self.exedir = os.path.normpath(self.basedir + "/ltp-cws-exe")
         
             self.bits = int(re.findall(r'\d+' , platform.architecture()[0])[0])
-            self.system = platform.system()
+            #self.system = platform.system()
+            sys_str = sys.platform.lower()
+            self.system = ""
+            if sys_str.startswith("win") :
+                self.system = "Windows"
+            elif sys_str.startswith("linux") :
+                self.system = "Linux"
+            elif sys_str.startswith("darwin") :
+                self.system = "OSX"
+            else :
+                self.system = "OTHER"
+            #print self.system 
             if self.system == "Linux" and self.bits == 64 :
                 self.exePrePath = os.path.normpath(self.exedir + "/linux_amd64/")
+            elif self.system == "Linux" and self.bits == 32 :
+                self.exePrePath = os.path.normpath(self.exedir + "/linux_i386/")
             elif self.system == "Windows" and self.bits == 64 :
                 self.exePrePath = os.path.normpath(self.exedir + '/win_x64/')
                 self.otExe += ".exe"
@@ -41,6 +54,8 @@ class NormalConfig(ttk.Frame) :
                 self.exePrePath = os.path.normpath(self.exedir + '/win_x86/')
                 self.otExe += ".exe"
                 self.cusOtExe += ".exe"
+            elif self.system == "OSX" :
+                self.exePrePath = os.path.normpath(self.exedir + '/osx/')
             else :
                 self.exePrePath = os.path.normpath(self.exedir + '/other/')
         except Exception , e :

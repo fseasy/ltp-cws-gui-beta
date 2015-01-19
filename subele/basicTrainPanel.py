@@ -135,7 +135,7 @@ class BasicTrainPanel(ttk.Frame) :
                 # "> " + self.saveDataPath ,
                 "2> " + self.logPath 
             ])
-            print self.cmdstr
+            #print self.cmdstr
             return True
         else :
             tkMessageBox.showerror("错误" , "未找到适合该平台的分词程序\nsystem info : %s , %s bits" %(self.conf.system , self.conf.bits))
@@ -155,7 +155,7 @@ class BasicTrainPanel(ttk.Frame) :
                     self.trainTipsVar.set("训练时间较长,请耐心等待,不要关掉程序.")
                 break
             except :
-                self.testTipsVar.set("读取LOG文件失败.剩余重试次数:"+str(try_times-1))
+                self.trainTipsVar.set("读取LOG文件失败.剩余重试次数:"+str(try_times-1))
                 time.sleep(4)
                 try_times -= 1
         else :
@@ -164,8 +164,10 @@ class BasicTrainPanel(ttk.Frame) :
             cont = self.logFile.read()
             if cont != '' :
                 self.logText.insert(tk.END , cont , "text")
+                #self.trainTipsVar.set(cont) 
                 self.logText.yview(tk.MOVETO , 1)
-            time.sleep(1.5)
+            self.logText.update()
+            time.sleep(0.1)
         try :
             self.logFile.close()
         except :
@@ -197,7 +199,8 @@ class BasicTrainPanel(ttk.Frame) :
         self.trainTipsVar.set("训练时间较长,请耐心等待,不要关掉程序.")
         
         self.workThread.start()
-        threading.Thread(target=self.updateLog).start()
+        #threading.Thread(target=self.updateLog).start()
+        self.updateLog()
         
     
     def cmdWork(self , cmdstr) :

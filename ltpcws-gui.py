@@ -49,4 +49,8 @@ class LtpwsFrame(tk.Frame) :
 
 ltpws_gui = LtpwsFrame()
 ltpws_gui.master.title("LTP分词版")
+try :
+    ltpws_gui.master.iconbitmap("ltp_logo.ico")
+except :
+    pass
 ltpws_gui.mainloop()
