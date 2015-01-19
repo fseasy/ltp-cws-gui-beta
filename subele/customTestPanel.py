@@ -138,15 +138,22 @@ class CustomTestPanel(ttk.Frame) :
     
     def updateLog(self) :
         self.logText.insert(tk.END , "开始个性化模型测试\n" , "head")
-        try :
-            self.logFile = open(self.logPath)
-            self.outFile = open(self.saveDataPath)
-        except :
-            print >>sys.stderr , "outFile / logFile open error"
-            print >>sys.stderr , self.logPath
-            print >>sys.stderr , self.saveDataPath
-            return 
-        while not self.isWorkThreadEnd :
+        try_times = 3
+        while try_times > 0 :
+            try :
+                self.logFile = open(self.logPath)
+                self.outFile = open(self.saveDataPath)
+                if try_times != 3 :
+                    self.testTipsVar.set("开始测试")
+                break
+            except :
+                self.testTipsVar.set("读取LOG或输出文件失败.剩余重试次数:"+str(try_times-1))
+                time.sleep(4)
+                try_times -= 1
+        else :
+            self.logFile = None
+            self.outFile = None
+        while not self.isWorkThreadEnd and self.logFile != None and self.outFile != None :
             outCont = tail(self.outFile,2)
             if outCont != '' :
                 self.outText.insert(tk.END , outCont , "cnText")

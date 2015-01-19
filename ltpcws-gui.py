@@ -48,5 +48,5 @@ class LtpwsFrame(tk.Frame) :
         
 
 ltpws_gui = LtpwsFrame()
-ltpws_gui.master.title("ltp-ws")
+ltpws_gui.master.title("LTP分词版")
 ltpws_gui.mainloop()

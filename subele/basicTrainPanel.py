@@ -151,8 +151,11 @@ class BasicTrainPanel(ttk.Frame) :
         while try_times > 0 :
             try :
                 self.logFile = open(self.logPath) # if this thread run before the workThread , it may cause error : the file has not been create
+                if try_times != 3 :
+                    self.trainTipsVar.set("训练时间较长,请耐心等待,不要关掉程序.")
                 break
             except :
+                self.testTipsVar.set("读取LOG文件失败.剩余重试次数:"+str(try_times-1))
                 time.sleep(4)
                 try_times -= 1
         else :
